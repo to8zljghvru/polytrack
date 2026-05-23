@@ -1,0 +1,14 @@
+{
+  "name": "polytrack-web-server",
+  "version": "0.6.0",
+  "private": true,
+  "description": "PolyTrack standalone web server with API and multiplayer relay",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "ws": "^8.18.0"
+  }
+}
