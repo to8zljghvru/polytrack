@@ -135,6 +135,36 @@ app.get('/v6/leaderboard', (req, res) => {
   res.json({ entries: mapped, total, userEntry });
 });
 
+// GET /v6/leaderboardUserEntry (separate endpoint called by the game for user position)
+app.get('/v6/leaderboardUserEntry', (req, res) => {
+  const { trackId, userTokenHash, onlyVerified } = req.query;
+  if (!trackId || !userTokenHash) return res.json(null);
+
+  const lb = getLeaderboard();
+  const entries = lb[trackId] ?? [];
+
+  let filtered = entries;
+  if (onlyVerified === 'true') {
+    filtered = entries.filter(e => e.verifiedState === 2);
+  }
+
+  filtered.sort((a, b) => (a.frames ?? Infinity) - (b.frames ?? Infinity));
+
+  const idx = filtered.findIndex(e => {
+    const hash = e.userToken ? crypto.createHash('sha256').update(e.userToken).digest('hex') : null;
+    return hash === userTokenHash;
+  });
+
+  if (idx === -1) return res.json(null);
+
+  const entry = filtered[idx];
+  res.json({
+    position: idx + 1,
+    frames: entry.frames,
+    id: entry.uploadId
+  });
+});
+
 // POST /v6/leaderboard
 app.post('/v6/leaderboard', (req, res) => {
   const { version, userToken, nickname, countryCode, carStyle, trackId, frames, recording, onlyVerified } = req.body;
